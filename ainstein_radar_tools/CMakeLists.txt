@@ -22,6 +22,7 @@ catkin_package()
 include_directories(
  include
  ${catkin_INCLUDE_DIRS}
+ ${ainstein_radar_filters_INCLUDE_DIRS}
  )
 
 add_executable(radar_camera_test_node src/radar_camera_test_node.cpp)
