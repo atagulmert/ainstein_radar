@@ -1,0 +1,6 @@
+<launch>
+  <node name="socketcan_bridge" pkg="socketcan_bridge" type="socketcan_bridge_node"  required="true" >
+    <param name="can_device" value="can0" />
+  </node>
+  <node name="o79_can" pkg="ainstein_radar_drivers" type="o79_can_node" required="true" output="screen" />
+</launch>

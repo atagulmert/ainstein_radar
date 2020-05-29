@@ -58,8 +58,15 @@ namespace ainstein_radar_drivers
 
   void RadarInterfaceO79CAN::dataMsgCallback( const can_msgs::Frame &msg )
   {
+    // ROS_INFO( "message received: " );
+    // for(int i = 0; i < 8; ++i)
+    //   {
+    // 	ROS_INFO( "%02x ", msg.data[i] );
+    //   }
+    // ROS_INFO( "\n" );
+    
     // Parse out start of frame messages:
-    if( msg.id == RadarInterfaceO79CAN::RADAR_START_FRAME )
+    if( msg.data[4]==0xFF && msg.data[5]==0xFF && msg.data[6]==0xFF && msg.data[7]==0xFF )
       {
         ROS_DEBUG( "received start frame from radar" );
         // clear radar data message arrays here
@@ -70,14 +77,14 @@ namespace ainstein_radar_drivers
         radar_data_msg_ptr_tracked_->targets.clear();
       }
     // Parse out end of frame messages:
-    else if( msg.id == RadarInterfaceO79CAN::RADAR_STOP_FRAME )
+    else if( msg.data[0]==0xFF && msg.data[1]==0xFF && msg.data[2]==0xFF && msg.data[3]==0xFF )
       {
         ROS_DEBUG( "received stop frame from radar" );
         pub_radar_data_raw_.publish( radar_data_msg_ptr_raw_ );
         pub_radar_data_tracked_.publish( radar_data_msg_ptr_tracked_ );
       }
     // Parse out raw target data messages:
-    else if( msg.id == RadarInterfaceO79CAN::RADAR_RAW_TARGET )
+    else if( msg.data[0] == 0x00 )
       {
         ROS_DEBUG( "received raw target from radar" );
 	
@@ -86,33 +93,41 @@ namespace ainstein_radar_drivers
         target.target_id = msg.data[0];
         target.snr = msg.data[1];
 
-	// Range scaling is 0.01m per count:
-	target.range = (int16_t)( ( msg.data[2] << 8 ) + msg.data[3] ) / 100.0;
+	// Range scaling is 0.1m per count:
+	target.range = (uint16_t)( ( msg.data[2] << 8 ) + msg.data[3] ) / 10.0;
 
 	// Speed scaling is 0.01m/s per count, +ve AWAY from radar, -ve TOWARDS:
-	target.speed = (int16_t)( ( msg.data[4] << 8 ) + msg.data[5] ) / 100.0;
+	target.speed = (int16_t)( ( msg.data[4] << 8 ) + msg.data[5] ) * 0.045;
 
 	// Azimuth angle scaling is -0.01rad per count: 
-	target.azimuth = (int16_t)( ( msg.data[6] << 8 ) + msg.data[7] ) / 100.0 * -1;
+	target.azimuth = (int8_t)( msg.data[6] );
 
 	// Elevation angle is unused for O79:
-	target.elevation = 0.0;
+	target.elevation = (int8_t)( msg.data[7] );
 
         radar_data_msg_ptr_raw_->targets.push_back( target );
       }
     // Parse out tracked target data messages:
-    else if( msg.id == RadarInterfaceO79CAN::RADAR_TRACKED_TARGET )
+    else if( msg.data[0] == 0x01 )
       {
         ROS_DEBUG( "received tracked target from radar" );
 
-        // Extract the target ID and data from the message:
+	// Extract the target ID and data from the message:
         ainstein_radar_msgs::RadarTarget target;
         target.target_id = msg.data[0];
         target.snr = msg.data[1];
-        target.range = (int16_t)( ( msg.data[2] << 8 ) + msg.data[3] ) / 100.0;
-        target.speed = (int16_t)( ( msg.data[4] << 8 ) + msg.data[5] ) / 100.0;
-        target.azimuth = (int16_t)( ( msg.data[6] << 8 ) + msg.data[7] ) / 100.0 * -1;
-        target.elevation = 0.0;
+
+	// Range scaling is 0.01m per count:
+	target.range = (int16_t)( ( msg.data[2] << 8 ) + msg.data[3] ) / 10.0;
+
+	// Speed scaling is 0.01m/s per count, +ve AWAY from radar, -ve TOWARDS:
+	target.speed = (int16_t)( ( msg.data[4] << 8 ) + msg.data[5] ) * 0.045;
+
+	// Azimuth angle scaling is -0.01rad per count: 
+	target.azimuth = (int8_t)( msg.data[6] );
+
+	// Elevation angle is unused for O79:
+	target.elevation = (int8_t)( msg.data[7] );
 
         radar_data_msg_ptr_tracked_->targets.push_back( target );
       }
