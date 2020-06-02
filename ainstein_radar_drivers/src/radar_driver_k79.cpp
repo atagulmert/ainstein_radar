@@ -124,26 +124,26 @@ namespace ainstein_radar_drivers
 	// If blocking recvfrom times out, errno is set to EAGAIN:
 	if( errno == EAGAIN )
 	  {
-	    // Send the connect command to the radar:
-	    RadarDriverK79::connect_cmd_str.copy( buffer_, RadarDriverK79::connect_cmd_str.length() );
-	    res = sendto( sockfd_, ( char* )buffer_, RadarDriverK79::connect_cmd_str.length(), 0, ( struct sockaddr *)( &destaddr_ ), sizeof( destaddr_ ) );
-	    if( res < 0 )
-	      {
-		std::cout << "Failed to send connect command to radar: " << std::strerror( errno ) << std::endl;
-		return false;
-	      }
+	    // // Send the connect command to the radar:
+	    // RadarDriverK79::connect_cmd_str.copy( buffer_, RadarDriverK79::connect_cmd_str.length() );
+	    // res = sendto( sockfd_, ( char* )buffer_, RadarDriverK79::connect_cmd_str.length(), 0, ( struct sockaddr *)( &destaddr_ ), sizeof( destaddr_ ) );
+	    // if( res < 0 )
+	    //   {
+	    // 	std::cout << "Failed to send connect command to radar: " << std::strerror( errno ) << std::endl;
+	    // 	return false;
+	    //   }
 
-	    // Wait for a response to the connect command:
-	    res = recvfrom( sockfd_, ( char* )buffer_, RadarDriverK79::connect_res_len, MSG_WAITALL, ( struct sockaddr *)( &src_addr ), &src_addr_len );
-	    if( res < 0 )
-	      {
-		std::cout << "Failed to receive connect response from radar: " << std::strerror( errno ) << std::endl;
-		return false;
-	      }
-	    else
-	      {
-		// TODO: print settings stored on radar from connect response message
-	      }
+	    // // Wait for a response to the connect command:
+	    // res = recvfrom( sockfd_, ( char* )buffer_, RadarDriverK79::connect_res_len, MSG_WAITALL, ( struct sockaddr *)( &src_addr ), &src_addr_len );
+	    // if( res < 0 )
+	    //   {
+	    // 	std::cout << "Failed to receive connect response from radar: " << std::strerror( errno ) << std::endl;
+	    // 	return false;
+	    //   }
+	    // else
+	    //   {
+	    // 	// TODO: print settings stored on radar from connect response message
+	    //   }
 
 	    // Send the run command to the radar:
 	    RadarDriverK79::run_cmd_str.copy( buffer_, RadarDriverK79::run_cmd_str.length() );
